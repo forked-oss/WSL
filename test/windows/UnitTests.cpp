@@ -6290,7 +6290,7 @@ Error code: Wsl/InstallDistro/WSL_E_INVALID_JSON\r\n",
 
         auto cleanup = wil::scope_exit_log(WI_DIAGNOSTICS_INFO, [&]() {
             std::filesystem::remove(testModules);
-            std::filesystem::remove(testFolder);
+            std::filesystem::remove_all(testFolder);
         });
 
         auto cmd = std::format(
