@@ -6281,12 +6281,17 @@ Error code: Wsl/InstallDistro/WSL_E_INVALID_JSON\r\n",
 
 #endif
 
-        // Create a copy of the modules vhd
-        auto testModules = std::filesystem::current_path() / "test-modules.vhd";
+        // Create a copy of the modules vhd in the user profile.
+        const auto testFolder = wsl::windows::common::helpers::GetUserProfilePath() / L"wsl-test";
+        const auto testModules = testFolder / L"test-modules.vhd";
+        std::filesystem::create_directories(testFolder);
 
         VERIFY_IS_TRUE(CopyFile(modulesPath.c_str(), testModules.c_str(), false));
 
-        auto cleanup = wil::scope_exit_log(WI_DIAGNOSTICS_INFO, [&]() { std::filesystem::remove(testModules); });
+        auto cleanup = wil::scope_exit_log(WI_DIAGNOSTICS_INFO, [&]() {
+            std::filesystem::remove(testModules);
+            std::filesystem::remove(testFolder);
+        });
 
         auto cmd = std::format(
             LR"($acl = Get-Acl '{}' ; $acl.RemoveAccessRuleAll((New-Object System.Security.AccessControl.FileSystemAccessRule(\"Everyone\", \"Read\", \"None\", \"None\", \"Allow\"))); Set-Acl -Path '{}' -AclObject $acl)",

@@ -1689,7 +1689,7 @@ std::wstring WslCoreVm::GenerateConfigJson()
 
     // Initialize SCSI devices.
     hcs::Scsi scsiController{};
-    auto attachDisk = [&](PCWSTR path) {
+    auto attachDisk = [&](PCWSTR path, bool grantVmAccess) {
         auto lun = ReserveLun();
         hcs::Attachment disk{};
         disk.Type = hcs::AttachmentType::VirtualDisk;
@@ -1699,18 +1699,27 @@ std::wstring WslCoreVm::GenerateConfigJson()
         disk.AlwaysAllowSparseFiles = true;
         disk.SupportEncryptedFiles = true;
         scsiController.Attachments[std::to_string(lun)] = std::move(disk);
-        m_attachedDisks.emplace(AttachedDisk{DiskType::VHD, path, false}, DiskState{lun, {}, {}});
+
+        DiskStateFlags diskFlags{};
+        if (grantVmAccess)
+        {
+            auto runAsUser = wil::impersonate_token(m_userToken.get());
+            wsl::windows::common::hcs::GrantVmAccess(m_machineId.c_str(), path);
+            WI_SetFlag(diskFlags, DiskStateFlags::AccessGranted);
+        }
+
+        m_attachedDisks.emplace(AttachedDisk{DiskType::VHD, path, false}, DiskState{lun, {}, diskFlags});
         return lun;
     };
 
     if (m_systemDistroDeviceType == LxMiniInitMountDeviceTypeLun)
     {
-        m_systemDistroDeviceId = attachDisk(m_vmConfig.SystemDistroPath.c_str());
+        m_systemDistroDeviceId = attachDisk(m_vmConfig.SystemDistroPath.c_str(), false);
     }
 
     if (!m_vmConfig.KernelModulesPath.empty())
     {
-        m_kernelModulesDeviceId = attachDisk(m_vmConfig.KernelModulesPath.c_str());
+        m_kernelModulesDeviceId = attachDisk(m_vmConfig.KernelModulesPath.c_str(), !m_defaultKernel);
     }
 
     vmSettings.Devices.Scsi["0"] = std::move(scsiController);
