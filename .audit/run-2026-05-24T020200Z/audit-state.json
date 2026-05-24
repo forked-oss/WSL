@@ -1,0 +1,19 @@
+{
+  "runId": "run-2026-05-24T020200Z",
+  "repo": "WSL",
+  "repoPath": "/agent/repos/WSL",
+  "workspaceDir": "/agent/repos/WSL",
+  "commit": "210b7640f7d1eb7da2cf4b4c47b6d1babd63b502",
+  "startedAt": "2026-05-24T02:10:17Z",
+  "endedAt": "2026-05-24T02:10:18Z",
+  "pipeline": "weekly-substitute-v1",
+  "skipReasons": {
+    "sast": "orchestrate pipeline scripts/cli not deployed in workspace",
+    "orchestrate_post_run": "scripts/cli/orchestrate_post_run.sh not found",
+    "validate_phase_output": "scripts/cli/validate_phase_output.py not found"
+  },
+  "truePositives": {"CRITICAL": 0, "HIGH": 9, "MEDIUM": 0, "LOW": 0},
+  "phasesCompleted": ["pattern_scan", "dependency_audit_partial"],
+  "phasesSkipped": ["sast_cache", "sast_ci", "sast_db", "sast_local", "orchestrate_post_run"],
+  "note": "/audit full pipeline (scripts/cli) not present; lightweight substitute executed."
+}
