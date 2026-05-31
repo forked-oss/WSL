@@ -72,3 +72,6 @@ test-storage/
 *.tar
 *.etl
 *.lscache
+
+# Weekly security audit artifacts
+.audit/
