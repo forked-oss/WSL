@@ -2,6 +2,20 @@
 
 Scanned commit: `210b7640f7d1eb7da2cf4b4c47b6d1babd63b502`
 
+## High: World-writable interop socket enables cross-user Windows process creation
+
+**Location:** `src/linux/init/util.cpp`
+
+**Attacker:** Local Linux user in the same WSL distro as a victim session.
+
+**Controlled input:** `LxInitMessageCreateProcessUtilityVm` sent to `/run/WSL` interop socket.
+
+**Attack path:** Interop socket is `chmod 0777` with no peer UID check; message forwarded to Windows `CreateProcess` as the victim's identity.
+
+**Impact:** Cross-user escalation to Windows code execution as victim identity.
+
+**Remediation:** Restrict interop socket permissions and authenticate peer credentials before forwarding process-creation messages.
+
 ## High: Elevated DrvFs mount selectable by unprivileged Linux control of interop/env
 
 **Location:** `src/linux/init/drvfs.cpp`
